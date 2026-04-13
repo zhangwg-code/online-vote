@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>在线投票</title>
+    <style>
+      :root {
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --primary: #3b82f6;
+        --primary-2: #2563eb;
+        --danger: #ef4444;
+        --border: #e5e7eb;
+        --shadow: 0 10px 30px rgba(17, 24, 39, 0.08);
+        --radius: 16px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Helvetica,
+          Arial,
+          "PingFang SC",
+          "Hiragino Sans GB",
+          "Microsoft YaHei",
+          sans-serif;
+        color: var(--text);
+        background: radial-gradient(900px 600px at 20% 10%, #eaf2ff 0%, rgba(234, 242, 255, 0) 60%),
+          radial-gradient(900px 600px at 90% 30%, #eef7ff 0%, rgba(238, 247, 255, 0) 55%),
+          var(--bg);
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+
+      .wrap {
+        width: min(760px, 100%);
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 22px;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .title {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: 0.2px;
+      }
+
+      .sub {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .stack {
+        display: grid;
+        gap: 12px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      label {
+        font-size: 13px;
+        color: var(--muted);
+        display: inline-block;
+        margin-bottom: 6px;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        outline: none;
+        transition:
+          box-shadow 0.15s ease,
+          border-color 0.15s ease;
+        background: #fbfdff;
+      }
+
+      input[type="text"]:focus {
+        border-color: rgba(59, 130, 246, 0.55);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+      }
+
+      .btns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
+      button {
+        appearance: none;
+        border: 1px solid transparent;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          transform 0.06s ease,
+          box-shadow 0.15s ease,
+          background 0.15s ease,
+          border-color 0.15s ease,
+          opacity 0.15s ease;
+        box-shadow: 0 8px 18px rgba(17, 24, 39, 0.08);
+        user-select: none;
+      }
+
+      button:active {
+        transform: translateY(1px);
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+        box-shadow: none;
+      }
+
+      .btn-primary {
+        background: linear-gradient(180deg, var(--primary) 0%, var(--primary-2) 100%);
+        color: #fff;
+      }
+
+      .btn-ghost {
+        background: #f8fafc;
+        border-color: var(--border);
+        color: var(--text);
+      }
+
+      .btn-danger {
+        background: #fff5f5;
+        border-color: rgba(239, 68, 68, 0.35);
+        color: #b91c1c;
+        box-shadow: none;
+      }
+
+      .btn-link {
+        background: transparent;
+        border-color: transparent;
+        box-shadow: none;
+        color: var(--primary-2);
+        padding: 8px 10px;
+      }
+
+      .hint {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .error {
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        color: #9a3412;
+        padding: 10px 12px;
+        border-radius: 12px;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .sep {
+        height: 1px;
+        background: var(--border);
+        margin: 16px 0;
+      }
+
+      .option-list {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .option-item {
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 12px;
+        background: #fbfdff;
+        display: grid;
+        gap: 10px;
+      }
+
+      .option-top {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .option-name {
+        font-weight: 700;
+      }
+
+      .meta {
+        font-size: 12px;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+
+      .bar {
+        width: 100%;
+        height: 10px;
+        border-radius: 999px;
+        background: #eef2ff;
+        overflow: hidden;
+        border: 1px solid rgba(37, 99, 235, 0.12);
+      }
+
+      .bar > div {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #93c5fd 0%, #3b82f6 60%, #2563eb 100%);
+        border-radius: 999px;
+        transition: width 0.2s ease;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        border: 1px solid var(--border);
+        background: #f8fafc;
+        color: var(--muted);
+      }
+
+      .pill strong {
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      @media (max-width: 520px) {
+        .row {
+          grid-template-columns: 1fr;
+        }
+        .btns {
+          justify-content: stretch;
+        }
+        button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card" id="app"></div>
+    </div>
+
+    <template id="tpl-create">
+      <div class="header">
+        <div>
+          <h1 class="title">创建投票</h1>
+          <p class="sub">输入投票标题并设置至少 2 个选项。创建后即可开始投票，刷新页面数据仍会保留。</p>
+        </div>
+        <span class="pill"><strong>本地模式</strong> 使用 localStorage</span>
+      </div>
+
+      <div class="stack">
+        <div>
+          <label for="pollTitle">投票标题</label>
+          <input id="pollTitle" type="text" placeholder="例如：本周团建活动选哪里？" maxlength="60" />
+        </div>
+
+        <div>
+          <label>投票选项</label>
+          <div class="stack" id="optionInputs"></div>
+          <div class="hint">支持添加/删除选项；创建时会自动忽略空白输入。</div>
+        </div>
+
+        <div class="btns">
+          <button class="btn-ghost" id="btnAddOption" type="button">添加选项</button>
+          <button class="btn-primary" id="btnCreate" type="button">创建并开始</button>
+        </div>
+
+        <div id="createError" class="error" style="display: none"></div>
+      </div>
+    </template>
+
+    <template id="tpl-vote">
+      <div class="header">
+        <div>
+          <h1 class="title" id="pollTitleText"></h1>
+          <p class="sub" id="pollSubText"></p>
+        </div>
+        <div class="btns">
+          <button class="btn-ghost" id="btnBackToEdit" type="button" style="display: none">返回编辑</button>
+          <button class="btn-danger" id="btnReset" type="button">重置投票</button>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="stack">
+        <div class="row">
+          <div class="pill" id="voteStatusPill"></div>
+          <div class="pill"><span>总票数</span><strong id="totalVotes">0</strong></div>
+        </div>
+
+        <ul class="option-list" id="optionList"></ul>
+
+        <div class="hint">
+          防重复投票：同一设备对该投票仅能投一次（基于 localStorage 标记）。如需重新投票请使用“重置投票”。
+        </div>
+      </div>
+    </template>
+
+    <script>
+      (function () {
+        // 使用一个固定 key 存储“当前投票”的全部数据（标题/选项/票数/是否已投）
+        const STORAGE_KEY = "vote_app_state_v1";
+
+        const appEl = document.getElementById("app");
+        const tplCreate = document.getElementById("tpl-create");
+        const tplVote = document.getElementById("tpl-vote");
+
+        function safeJsonParse(text) {
+          try {
+            return JSON.parse(text);
+          } catch {
+            return null;
+          }
+        }
+
+        function loadState() {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          const parsed = raw ? safeJsonParse(raw) : null;
+          if (!parsed || typeof parsed !== "object") return null;
+          if (!parsed.title || !Array.isArray(parsed.options)) return null;
+          return parsed;
+        }
+
+        function saveState(state) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function clearState() {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+
+        function uid() {
+          return (
+            "opt_" +
+            Math.random().toString(16).slice(2) +
+            "_" +
+            Date.now().toString(16) +
+            "_" +
+            Math.random().toString(16).slice(2)
+          );
+        }
+
+        function normalizeOptionText(text) {
+          return String(text || "").trim().replace(/\s+/g, " ");
+        }
+
+        function dedupeTexts(texts) {
+          const seen = new Set();
+          const out = [];
+          for (const t of texts) {
+            const key = t.toLowerCase();
+            if (!seen.has(key)) {
+              seen.add(key);
+              out.push(t);
+            }
+          }
+          return out;
+        }
+
+        function formatPercent(p) {
+          if (!Number.isFinite(p)) return "0%";
+          if (p <= 0) return "0%";
+          if (p >= 100) return "100%";
+          return p.toFixed(1).replace(/\.0$/, "") + "%";
+        }
+
+        function computeStats(state) {
+          // 统计总票数，并计算每个选项的百分比
+          const total = state.options.reduce((sum, o) => sum + (Number(o.votes) || 0), 0);
+          const rows = state.options.map((o) => {
+            const votes = Number(o.votes) || 0;
+            const pct = total > 0 ? (votes / total) * 100 : 0;
+            return { ...o, votes, pct };
+          });
+          return { total, rows };
+        }
+
+        function setView(node) {
+          appEl.innerHTML = "";
+          appEl.appendChild(node);
+        }
+
+        function materializeTemplate(tplEl) {
+          const fragment = tplEl.content.cloneNode(true);
+          const root = document.createElement("div");
+          while (fragment.firstChild) root.appendChild(fragment.firstChild);
+          return root;
+        }
+
+        function createOptionInputRow(value, canRemove) {
+          const row = document.createElement("div");
+          row.className = "row";
+
+          const input = document.createElement("input");
+          input.type = "text";
+          input.placeholder = "选项内容";
+          input.maxLength = 40;
+          input.value = value || "";
+          input.dataset.role = "option-input";
+
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = canRemove ? "btn-danger" : "btn-ghost";
+          btn.textContent = canRemove ? "删除" : "保留";
+          btn.disabled = !canRemove;
+          btn.dataset.action = "remove-option-input";
+
+          row.appendChild(input);
+          row.appendChild(btn);
+          return row;
+        }
+
+        function renderCreate(existingDraft) {
+          const root = materializeTemplate(tplCreate);
+
+          const pollTitle = root.querySelector("#pollTitle");
+          const optionInputs = root.querySelector("#optionInputs");
+          const btnAddOption = root.querySelector("#btnAddOption");
+          const btnCreate = root.querySelector("#btnCreate");
+          const errorBox = root.querySelector("#createError");
+
+          const initialTitle = existingDraft?.title ? String(existingDraft.title) : "";
+          const initialOptions = Array.isArray(existingDraft?.options)
+            ? existingDraft.options.map((o) => normalizeOptionText(o.text)).filter(Boolean)
+            : [];
+
+          pollTitle.value = initialTitle;
+
+          function syncRemoveButtons() {
+            const rows = Array.from(optionInputs.querySelectorAll(".row"));
+            const canRemove = rows.length > 2;
+            for (const r of rows) {
+              const btn = r.querySelector('button[data-action="remove-option-input"]');
+              btn.disabled = !canRemove;
+              btn.className = canRemove ? "btn-danger" : "btn-ghost";
+              btn.textContent = canRemove ? "删除" : "保留";
+            }
+          }
+
+          function addInput(value) {
+            const rows = optionInputs.querySelectorAll(".row");
+            const row = createOptionInputRow(value, rows.length >= 2);
+            optionInputs.appendChild(row);
+            syncRemoveButtons();
+          }
+
+          const seed = initialOptions.length >= 2 ? initialOptions : ["", ""];
+          for (const v of seed) addInput(v);
+
+          btnAddOption.addEventListener("click", () => addInput(""));
+
+          optionInputs.addEventListener("click", (e) => {
+            const btn = e.target.closest('button[data-action="remove-option-input"]');
+            if (!btn || btn.disabled) return;
+            const row = btn.closest(".row");
+            if (row) row.remove();
+            syncRemoveButtons();
+          });
+
+          function showError(message) {
+            errorBox.style.display = "block";
+            errorBox.textContent = message;
+          }
+
+          function clearError() {
+            errorBox.style.display = "none";
+            errorBox.textContent = "";
+          }
+
+          btnCreate.addEventListener("click", () => {
+            clearError();
+
+            // 1) 校验标题与选项（至少 2 个不重复且非空）
+            const title = normalizeOptionText(pollTitle.value);
+            if (!title) {
+              showError("请输入投票标题。");
+              pollTitle.focus();
+              return;
+            }
+
+            const inputs = Array.from(optionInputs.querySelectorAll('input[data-role="option-input"]'));
+            const texts = inputs.map((i) => normalizeOptionText(i.value)).filter(Boolean);
+            const unique = dedupeTexts(texts);
+
+            if (unique.length < 2) {
+              showError("请至少填写 2 个不重复的选项。");
+              return;
+            }
+
+            const state = {
+              version: 1,
+              title,
+              options: unique.map((text) => ({ id: uid(), text, votes: 0 })),
+              // 防重复投票：同一设备对该投票仅能投一次（用 localStorage 中的 hasVoted 标记）
+              hasVoted: false,
+              votedOptionId: null,
+              createdAt: Date.now()
+            };
+
+            saveState(state);
+            renderVote(state);
+          });
+
+          setView(root);
+        }
+
+        function renderVote(state) {
+          const root = materializeTemplate(tplVote);
+
+          const pollTitleText = root.querySelector("#pollTitleText");
+          const pollSubText = root.querySelector("#pollSubText");
+          const btnReset = root.querySelector("#btnReset");
+          const btnBackToEdit = root.querySelector("#btnBackToEdit");
+          const voteStatusPill = root.querySelector("#voteStatusPill");
+          const totalVotesEl = root.querySelector("#totalVotes");
+          const optionList = root.querySelector("#optionList");
+
+          pollTitleText.textContent = state.title;
+          pollSubText.textContent = state.hasVoted
+            ? "你已完成投票，当前为实时统计结果。"
+            : "点击某一选项即可投票（每台设备仅一次）。";
+
+          btnBackToEdit.style.display = state.hasVoted ? "none" : "inline-flex";
+
+          function syncUI() {
+            const { total, rows } = computeStats(state);
+            totalVotesEl.textContent = String(total);
+
+            voteStatusPill.innerHTML = state.hasVoted
+              ? `<span>投票状态</span><strong>已投</strong>`
+              : `<span>投票状态</span><strong>未投</strong>`;
+
+            optionList.innerHTML = "";
+
+            for (const row of rows) {
+              const li = document.createElement("li");
+              li.className = "option-item";
+
+              const top = document.createElement("div");
+              top.className = "option-top";
+
+              const name = document.createElement("div");
+              name.className = "option-name";
+              name.textContent = row.text;
+
+              const meta = document.createElement("div");
+              meta.className = "meta";
+              meta.textContent = `${row.votes} 票 · ${formatPercent(row.pct)}`;
+
+              top.appendChild(name);
+              top.appendChild(meta);
+
+              const bar = document.createElement("div");
+              bar.className = "bar";
+              const inner = document.createElement("div");
+              inner.style.width = `${Math.max(0, Math.min(100, row.pct))}%`;
+              bar.appendChild(inner);
+
+              const voteBtn = document.createElement("button");
+              voteBtn.type = "button";
+              voteBtn.className = row.id === state.votedOptionId ? "btn-primary" : "btn-ghost";
+              voteBtn.textContent = row.id === state.votedOptionId ? "已投该项" : "投票";
+              voteBtn.disabled = state.hasVoted;
+              voteBtn.dataset.action = "vote";
+              voteBtn.dataset.optionId = row.id;
+
+              li.appendChild(top);
+              li.appendChild(bar);
+              li.appendChild(voteBtn);
+
+              optionList.appendChild(li);
+            }
+          }
+
+          optionList.addEventListener("click", (e) => {
+            const btn = e.target.closest('button[data-action="vote"]');
+            if (!btn) return;
+            if (state.hasVoted) return;
+
+            // 2) 投票：只允许一次，投完立即持久化并刷新统计
+            const optionId = btn.dataset.optionId;
+            const opt = state.options.find((o) => o.id === optionId);
+            if (!opt) return;
+
+            opt.votes = (Number(opt.votes) || 0) + 1;
+            state.hasVoted = true;
+            state.votedOptionId = optionId;
+
+            saveState(state);
+            pollSubText.textContent = "你已完成投票，当前为实时统计结果。";
+            btnBackToEdit.style.display = "none";
+            syncUI();
+          });
+
+          btnBackToEdit.addEventListener("click", () => {
+            renderCreate(state);
+          });
+
+          btnReset.addEventListener("click", () => {
+            clearState();
+            renderCreate(null);
+          });
+
+          syncUI();
+          setView(root);
+        }
+
+        const state = loadState();
+        if (state) renderVote(state);
+        else renderCreate(null);
+      })();
+    </script>
+  </body>
+</html>
